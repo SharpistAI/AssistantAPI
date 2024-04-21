@@ -19,10 +19,9 @@ namespace AssistantAPI.Service
         public async Task<ChatResponseMessage?> GenerateQuestionsAsync(string documentName, QuestionType questionType)
         {
             var prompt = new StringBuilder(
-                "**IN CONTEXT: I am a large language model trained to generate questions based on factual information. I can access and process information from Azure Search Service.**" +
-                $"**You:** I have a file titled \"{documentName}\" in Azure Search. Can you generate {questionType} questions for this file?" +
-                "**Azure Search:** (Here, Azure Search will return the content of the file)" +
-                $"**Based on the retrieved content, generate 3 {questionType} questions with the following format:**");
+                "**IN CONTEXT: I am a large language model trained to generate questions based on factual information. I can access and process information from Azure AI Search.**" +
+                $"**You:** I have a document titled {documentName} in Azure AI Search. Can you generate {questionType} questions for this file?" +
+                "**Azure Search:** (Here, Azure Search will return the content of the file)");
                            
             switch (questionType)
             {
@@ -58,12 +57,10 @@ namespace AssistantAPI.Service
         {
             var prompt = new StringBuilder(
                 "**IN CONTEXT: I am a large language model trained to evaluate user answers based on factual information. I can access and process information from Azure Search Service.**" +
-                $"**You:** I have a file titled \"{documentTitle}\" in Azure Search. The user provided the following answer: \"{answer}\"" +
+                $"**You:** I have a file titled {documentTitle} in Azure AI Search. The user provided the following answer: \"{answer}\"" +
                 "**Azure Search:** (Here, Azure Search will return the content of the file)" +
-                "**Based on the retrieved content and the user answer, is the user answer true or false?**" +
-                "**Possible Answers:**" +
-                "* True" +
-                "* False");
+                "**Based on the retrieved content and the user answer, is the user answer true or false the following format without any other text:?**" +
+                "True or False");
 
             return await GetChatResponseMessageAsync(prompt.ToString());
         }
@@ -87,9 +84,7 @@ namespace AssistantAPI.Service
                             {
                                 IndexName = _settings.SearchIndex,
                                 SearchEndpoint = new Uri(_settings.SearchEndpoint),
-                                Authentication = new OnYourDataApiKeyAuthenticationOptions(_settings.SearchKey),
-                                DocumentCount = 10,
-                                SemanticConfiguration = "vector-1713549198488-semantic-configuration"
+                                Authentication = new OnYourDataApiKeyAuthenticationOptions(_settings.SearchKey)
 
                             }
                         }

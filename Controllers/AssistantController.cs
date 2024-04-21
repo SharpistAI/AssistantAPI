@@ -9,7 +9,7 @@ namespace AssistantAPI.Controllers
     [ApiController]
     public class AssistantController(AiClient client, AsyncRetryPolicy retryPolicy) : ControllerBase
     {
-        [HttpPost]
+        [HttpPost("GetQuestions")]
         public async Task<ChatResponseMessage?> GetQuestionsAndAnswer(string documentName, QuestionType questionType)
         {
             try
@@ -29,7 +29,7 @@ namespace AssistantAPI.Controllers
             return null;
         }
 
-        [HttpPost]
+        [HttpPost("EvalAnswer")]
         public async Task<ChatResponseMessage?> EvaluateAnswer(string documentTitle, string userAnswer)
         {
             try
