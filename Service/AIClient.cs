@@ -16,35 +16,36 @@ namespace AssistantAPI.Service
             _client = new OpenAIClient(new Uri(_settings.AzureOpenAIEndpoint), new AzureKeyCredential(_settings.AzureOpenAIKey));
         }
 
-        public async Task<ChatResponseMessage?> GenerateQuestionsAsync(string documentName, QuestionType questionType)
+        public async Task<ChatResponseMessage?> GenerateQuestionsAsync(string documentName, string keyword, QuestionType questionType)
         {
             var prompt = new StringBuilder(
                 "**IN CONTEXT: I am a large language model trained to generate questions based on factual information. I can access and process information from Azure AI Search.**" +
-                $"**You:** I have a document titled {documentName} in Azure AI Search. Can you generate {questionType} questions for this file?" +
+                $"**You:** I have a document with title: {documentName} in Azure AI Search and about {keyword}. Can you generate {questionType} questions for this document?" +
                 "**Azure Search:** (Here, Azure Search will return the content of the file)");
                            
             switch (questionType)
             {
                 case QuestionType.ShortAnswer:
-                    prompt.AppendLine("With short-answer. Output following format:");
+                    prompt.AppendLine("**With short-answer. Output following format without extra text:**");
                     prompt.AppendLine("1. Question 1");
                     prompt.AppendLine("     * Correct Answer:");
                     prompt.AppendLine("2. Question 2 (Follow the same format)");
                     prompt.AppendLine("3. Question 3 (Follow the same format)");
                     break;
                 case QuestionType.FreeAnswer:
-                    prompt.AppendLine($"**Based on the retrieved content, generate 3 {questionType} questions the following format:**");
+                    prompt.AppendLine($"**Based on the retrieved content, generate 3 {questionType} questions the following format without extra text:**");
                     prompt.AppendLine("1. Question 1");
                     prompt.AppendLine("2. Question 2");
                     prompt.AppendLine("3. Question 3");
                     break;
                 case QuestionType.MultiChoice:
                 default:
-                    prompt.AppendLine($"**Based on the retrieved content, generate 3 {questionType} questions with answers the following format:**");
+                    prompt.AppendLine($"**Based on the retrieved content, generate 3 {questionType} questions with answers the following format without extra text:**");
                     prompt.AppendLine("1. Question 1");
                     prompt.AppendLine("    * Answer choice A");
                     prompt.AppendLine("    * Answer choice B");
                     prompt.AppendLine("    * Answer choice C (One of these choices should be the correct answer)");
+                    prompt.AppendLine("    * Correct Answer");
                     prompt.AppendLine("2. Question 2 (Follow the same format)");
                     prompt.AppendLine("3. Question 3 (Follow the same format)");
                     break;
@@ -53,13 +54,13 @@ namespace AssistantAPI.Service
             return await GetChatResponseMessageAsync(prompt.ToString());
         }
 
-        public async Task<ChatResponseMessage?> EvaluateAnswer(string documentTitle, string answer)
+        public async Task<ChatResponseMessage?> EvaluateAnswer(string documentTitle,string keyword,string question, string answer)
         {
             var prompt = new StringBuilder(
                 "**IN CONTEXT: I am a large language model trained to evaluate user answers based on factual information. I can access and process information from Azure Search Service.**" +
-                $"**You:** I have a file titled {documentTitle} in Azure AI Search. The user provided the following answer: \"{answer}\"" +
+                $"**You:** I have a document with title: {documentTitle} in Azure AI Search and about {keyword}. The user provided the following answer: \"{answer}\"" +
                 "**Azure Search:** (Here, Azure Search will return the content of the file)" +
-                "**Based on the retrieved content and the user answer, is the user answer true or false the following format without any other text:?**" +
+                $@"**Based on the retrieved content and the user answer, is the user answer true or false for this question: {question} the following format without any extra text:?**" +
                 "True or False");
 
             return await GetChatResponseMessageAsync(prompt.ToString());

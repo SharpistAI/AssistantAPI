@@ -10,13 +10,13 @@ namespace AssistantAPI.Controllers
     public class AssistantController(AiClient client, AsyncRetryPolicy retryPolicy) : ControllerBase
     {
         [HttpPost("GetQuestions")]
-        public async Task<ChatResponseMessage?> GetQuestionsAndAnswer(string documentName, QuestionType questionType)
+        public async Task<ChatResponseMessage?> GetQuestionsAndAnswer(string documentName,string keyword, QuestionType questionType)
         {
             try
             {
                 var response = await retryPolicy.ExecuteAsync(async () =>
                 {
-                    var responseMessage = await client.GenerateQuestionsAsync(documentName, questionType);
+                    var responseMessage = await client.GenerateQuestionsAsync(documentName,keyword, questionType);
                     return responseMessage;
                 });
 
@@ -30,13 +30,14 @@ namespace AssistantAPI.Controllers
         }
 
         [HttpPost("EvalAnswer")]
-        public async Task<ChatResponseMessage?> EvaluateAnswer(string documentTitle, string userAnswer)
+        public async Task<ChatResponseMessage?> EvaluateAnswer(string documentTitle, string keyword, string question,
+            string userAnswer)
         {
             try
             {
                 var response = await retryPolicy.ExecuteAsync(async () =>
                 {
-                    var responseMessage = await client.EvaluateAnswer(documentTitle, userAnswer);
+                    var responseMessage = await client.EvaluateAnswer(documentTitle, keyword, question, userAnswer);
                     return responseMessage;
                 });
 
@@ -46,6 +47,7 @@ namespace AssistantAPI.Controllers
             {
                 Console.WriteLine(e);
             }
+
             return null;
         }
     }
