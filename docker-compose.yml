@@ -1,0 +1,10 @@
+﻿version: '3.4'
+
+services:
+  ian-botan:
+    image: ${DOCKER_REGISTRY-}assistantapi
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '8080:8080'
